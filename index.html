@@ -53,7 +53,7 @@
             align-items: center;
             margin-bottom: 12px;
             gap: 10px;
-            flex-shrink: 0; /* ヘッダーが縮まないように固定 */
+            flex-shrink: 0;
         }
         .toggle-container { display: flex; }
         .toggle-btn {
@@ -87,9 +87,9 @@
         .action-btn.check { background-color: #e91e63; }
         .action-btn:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
 
-        /* 画面いっぱいに広がる4行3列のグリッド設定 */
+        /* メインコンテナ */
         .main-container {
-            flex-grow: 1; /* 残りの画面縦幅をすべて使う */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -121,10 +121,10 @@
             cursor: pointer;
             transition: all 0.1s;
             white-space: nowrap; 
-            height: 100%; /* 親要素の高さに引き伸ばす */
+            height: 100%;
         }
         .sound-btn span:first-child {
-            font-size: clamp(20px, 4vh, 32px); /* 画面サイズに合わせて文字も自動拡大 */
+            font-size: clamp(20px, 4vh, 32px);
             font-weight: bold;
             display: block;
         }
@@ -198,10 +198,10 @@
             align-items: center;
         }
         
-        /* 【間隔の修正】文字同士を今までよりぐっと近づける設定 */
-        .step-box.far { letter-spacing: 25px; padding-left: 25px; }       /* 遠い：これまでの近い(25px)と同じくらいに縮小 */
-        .step-box.close { letter-spacing: 5px; padding-left: 5px; }       /* 近い：さらにすれすれ(5px)まで接近 */
-        .step-box.combined { letter-spacing: 0px; padding-left: 0; }      /* くっつく */
+        /* 表記の距離はキープ */
+        .step-box.far { letter-spacing: 90px; padding-left: 90px; }       
+        .step-box.close { letter-spacing: 45px; padding-left: 45px; }     
+        .step-box.combined { letter-spacing: 0px; padding-left: 0; }      
         
         .step-box.active-frame {
             border-color: #ff3333;
@@ -251,7 +251,6 @@
             {{ checkResult }}
         </div>
 
-        <!-- 画面全体に引き伸ばされたメイングリッド -->
         <div class="main-grid">
             <div v-for="(group, gIndex) in currentData" :key="gIndex" class="row-group">
                 <button 
@@ -281,12 +280,12 @@
         </div>
 
         <div class="practice-container" v-if="selectedSound">
-            <!-- 上段: 遠い（以前の"近い"のレベルまで最初から近づけて表示） -->
+            <!-- 上段: 遠い -->
             <div class="step-box far" :class="{ 'active-frame': currentStep === 1 }">
                 {{ largeSplitKana.first }}{{ largeSplitKana.second }}
             </div>
 
-            <!-- 中段: 近い（文字がすれすれに重なる手前までさらに接近） -->
+            <!-- 中段: 近い -->
             <div class="step-box close" :class="{ 'active-frame': currentStep === 2 }">
                 {{ largeSplitKana.first }}{{ largeSplitKana.second }}
             </div>
@@ -387,7 +386,7 @@
                 view.value = 'main';
             };
 
-            // 【音声間隔の修正】文字の距離に合わせて、発音間隔も大幅に短縮
+            // 【発音タイミングの修正】
             const startPracticeAnimation = async () => {
                 if (isPlaying.value || !selectedSound.value) return;
                 isPlaying.value = true;
@@ -396,21 +395,21 @@
                 const secondChar = largeSplitKana.value.second;
                 const fullChar = selectedSound.value.kana;
 
-                // ステップ1: 遠い（文字は少し近め、発音間隔を350msへ短縮）
+                // ステップ1: 上段（「し〇よ」と一拍だけ空けて読む）
                 currentStep.value = 1;
                 await speakWord(firstChar, 1.0);
-                await new Promise(r => setTimeout(r, 350)); 
+                await new Promise(r => setTimeout(r, 650)); // 一拍のブランク（約0.65秒）
                 await speakWord(secondChar, 1.0);
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 1200)); // 次の段への待ち時間
 
-                // ステップ2: 近い（文字はすれすれ、発音間隔をわずか80msへ短縮。ほぼ一息）
+                // ステップ2: 中段（「し、よ」とテンポよく読む）
                 currentStep.value = 2;
                 await speakWord(firstChar, 1.0);
-                await new Promise(r => setTimeout(r, 80)); 
+                await new Promise(r => setTimeout(r, 250)); // 読点レベルの短いあき（約0.25秒）
                 await speakWord(secondChar, 1.0);
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 1200));
 
-                // ステップ3: くっつく
+                // ステップ3: 下段（完全につなげて発音）
                 currentStep.value = 3;
                 await speakWord(fullChar, 1.0);
                 
