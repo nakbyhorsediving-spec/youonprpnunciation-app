@@ -386,7 +386,7 @@
                 view.value = 'main';
             };
 
-            // 【発音タイミングの再調整】
+            // 【発音タイミングの変更】
             const startPracticeAnimation = async () => {
                 if (isPlaying.value || !selectedSound.value) return;
                 isPlaying.value = true;
@@ -396,19 +396,19 @@
                 const fullChar = selectedSound.value.kana;
                 const plainBothChars = firstChar + secondChar; // 例：「しよ」
 
-                // ステップ1: 上段（間隔をこれまでの半分：300msに変更）
+                // ステップ1: 上段（前回の300msから3割減らし、210msに設定）
                 currentStep.value = 1;
                 await speakWord(firstChar, 1.0);
-                await new Promise(r => setTimeout(r, 300)); // 以前の半分に短縮
+                await new Promise(r => setTimeout(r, 210)); // 3割削減
                 await speakWord(secondChar, 1.0);
                 await new Promise(r => setTimeout(r, 1200)); 
 
-                // ステップ2: 中段（「しよ」と普通につなげて読む）
+                // ステップ2: 中段（普通につなげて「しよ」と読む）
                 currentStep.value = 2;
-                await speakWord(plainBothChars, 1.0); // 分割せず一度に発音
+                await speakWord(plainBothChars, 1.0); 
                 await new Promise(r => setTimeout(r, 1200));
 
-                // ステップ3: 下段（拗音として小さくつなげて発音）
+                // ステップ3: 下段（本来の小さくつなげる拗音発音）
                 currentStep.value = 3;
                 await speakWord(fullChar, 1.0);
                 
