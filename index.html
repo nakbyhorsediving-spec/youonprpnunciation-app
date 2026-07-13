@@ -198,7 +198,7 @@
             align-items: center;
         }
         
-        /* 表記の距離はキープ */
+        /* 表記の距離 */
         .step-box.far { letter-spacing: 90px; padding-left: 90px; }       
         .step-box.close { letter-spacing: 45px; padding-left: 45px; }     
         .step-box.combined { letter-spacing: 0px; padding-left: 0; }      
@@ -230,7 +230,8 @@
 <div id="app">
     <!-- 1. 全音表示画面（メイン） -->
     <div v-if="view === 'main'" class="main-container">
-        <h1>拗音（ようおん）学習</h1>
+        <!-- 表記を修正：「拗音（ようおん）の べんきょう」 -->
+        <h1>拗音（ようおん）の べんきょう</h1>
         
         <div class="header-controls">
             <div class="toggle-container">
@@ -386,7 +387,6 @@
                 view.value = 'main';
             };
 
-            // 【発音タイミングの変更】
             const startPracticeAnimation = async () => {
                 if (isPlaying.value || !selectedSound.value) return;
                 isPlaying.value = true;
@@ -394,21 +394,21 @@
                 const firstChar = largeSplitKana.value.first;
                 const secondChar = largeSplitKana.value.second;
                 const fullChar = selectedSound.value.kana;
-                const plainBothChars = firstChar + secondChar; // 例：「しよ」
+                const plainBothChars = firstChar + secondChar;
 
-                // ステップ1: 上段（前回の300msから3割減らし、210msに設定）
+                // ステップ1: 上段
                 currentStep.value = 1;
                 await speakWord(firstChar, 1.0);
-                await new Promise(r => setTimeout(r, 210)); // 3割削減
+                await new Promise(r => setTimeout(r, 210)); 
                 await speakWord(secondChar, 1.0);
                 await new Promise(r => setTimeout(r, 1200)); 
 
-                // ステップ2: 中段（普通につなげて「しよ」と読む）
+                // ステップ2: 中段
                 currentStep.value = 2;
                 await speakWord(plainBothChars, 1.0); 
                 await new Promise(r => setTimeout(r, 1200));
 
-                // ステップ3: 下段（本来の小さくつなげる拗音発音）
+                // ステップ3: 下段
                 currentStep.value = 3;
                 await speakWord(fullChar, 1.0);
                 
