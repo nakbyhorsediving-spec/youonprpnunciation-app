@@ -6,34 +6,44 @@
     <title>日本語 拗音学習アプリ</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f7f9fa;
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
             margin: 0;
-            padding: 10px;
+            padding: 0;
+            background-color: #f7f9fa;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
             display: flex;
             justify-content: center;
+            align-items: center;
+            padding: 10px;
         }
         #app {
-            max-width: 800px;
-            width: 100%;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100%;
+            max-height: 100%;
             background: white;
             padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
         }
+        
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 10px;
-            font-size: 22px;
+            margin: 0 0 10px 0;
+            font-size: 24px;
         }
         p.subtitle {
             text-align: center;
             color: #666;
-            margin-top: -5px;
-            margin-bottom: 15px;
-            font-size: 13px;
+            margin: -5px 0 10px 0;
+            font-size: 14px;
         }
         
         /* コントロール周り */
@@ -41,13 +51,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             gap: 10px;
+            flex-shrink: 0; /* ヘッダーが縮まないように固定 */
         }
         .toggle-container { display: flex; }
         .toggle-btn {
-            padding: 6px 12px;
-            font-size: 14px;
+            padding: 8px 16px;
+            font-size: 16px;
             cursor: pointer;
             border: 2px solid #4A90E2;
             background: white;
@@ -60,15 +71,15 @@
 
         .btn-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
         .action-btn {
-            padding: 6px 14px;
-            font-size: 14px;
+            padding: 8px 20px;
+            font-size: 16px;
             font-weight: bold;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -76,35 +87,44 @@
         .action-btn.check { background-color: #e91e63; }
         .action-btn:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
 
-        /* スクロール不要にするための4行3列配置（外枠を3列、内側も3列） */
+        /* 画面いっぱいに広がる4行3列のグリッド設定 */
+        .main-container {
+            flex-grow: 1; /* 残りの画面縦幅をすべて使う */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
         .main-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            gap: 10px;
+            height: 100%;
+            flex-grow: 1;
         }
         .row-group {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
+            gap: 6px;
             background: #f0f4f8;
-            padding: 6px;
-            border-radius: 6px;
+            padding: 8px;
+            border-radius: 8px;
+            height: 100%;
         }
         .sound-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 8px 2px;
             background: white;
             border: 2px solid #e1e8ed;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.1s;
             white-space: nowrap; 
+            height: 100%; /* 親要素の高さに引き伸ばす */
         }
         .sound-btn span:first-child {
-            font-size: 18px;
+            font-size: clamp(20px, 4vh, 32px); /* 画面サイズに合わせて文字も自動拡大 */
             font-weight: bold;
             display: block;
         }
@@ -114,90 +134,102 @@
             color: #1565c0;
         }
         .romaji {
-            font-size: 11px;
+            font-size: clamp(11px, 1.8vh, 15px);
             color: #888;
-            margin-top: 1px;
+            margin-top: 4px;
         }
 
         /* 練習ページのスタイル */
-        .practice-page { text-align: center; }
+        .practice-page { 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+        }
         .btn-group {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 15px;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
         }
         .play-trigger-btn {
-            padding: 10px 20px;
-            font-size: 15px;
+            padding: 12px 25px;
+            font-size: 16px;
             font-weight: bold;
             background: #4caf50;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
         }
         .play-trigger-btn:disabled { background: #aaa; }
         .back-btn {
-            padding: 10px 20px;
-            font-size: 15px;
+            padding: 12px 25px;
+            font-size: 16px;
             font-weight: bold;
             background: #607d8b;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
         }
 
         .practice-container {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin: 15px auto;
-            max-width: 450px;
+            gap: 15px;
+            margin: 10px auto;
+            width: 100%;
+            max-width: 500px;
+            flex-grow: 1;
+            justify-content: space-around;
         }
         .step-box {
-            font-size: 40px;
+            font-size: 52px;
             font-weight: bold;
-            padding: 8px;
+            padding: 15px;
             border: 3px solid transparent;
             border-radius: 12px;
             transition: all 0.2s;
             background: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        /* 字間隔の調整：上段(最大に離す) ＞ 中段(少し近づける) ＞ 下段(くっつく) */
-        .step-box.far { letter-spacing: 70px; padding-left: 70px; }
-        .step-box.close { letter-spacing: 20px; padding-left: 20px; } /* 今より間隔を狭く修正 */
-        .step-box.combined { letter-spacing: 0px; }
+        
+        /* 【間隔の修正】文字同士を今までよりぐっと近づける設定 */
+        .step-box.far { letter-spacing: 25px; padding-left: 25px; }       /* 遠い：これまでの近い(25px)と同じくらいに縮小 */
+        .step-box.close { letter-spacing: 5px; padding-left: 5px; }       /* 近い：さらにすれすれ(5px)まで接近 */
+        .step-box.combined { letter-spacing: 0px; padding-left: 0; }      /* くっつく */
         
         .step-box.active-frame {
             border-color: #ff3333;
             background: #ffebee;
-            transform: scale(1.02);
+            transform: scale(1.03);
         }
 
         /* 発音チェック用スタイル */
         .check-status {
             font-size: 18px;
             font-weight: bold;
-            margin: 15px 0;
-            padding: 10px;
+            margin-bottom: 10px;
+            padding: 12px;
             border-radius: 6px;
+            flex-shrink: 0;
         }
         .status-listening { color: #e91e63; background: #fce4ec; animation: blink 1s infinite; }
         .status-success { color: #2e7d32; background: #e8f5e9; }
         .status-fail { color: #c62828; background: #ffebee; }
         
-        @keyframes blink {
-            50% { opacity: 0.5; }
-        }
+        @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
 <div id="app">
     <!-- 1. 全音表示画面（メイン） -->
-    <div v-if="view === 'main'">
+    <div v-if="view === 'main'" class="main-container">
         <h1>拗音（ようおん）学習</h1>
         
         <div class="header-controls">
@@ -206,7 +238,6 @@
                 <button class="toggle-btn" :class="{ active: mode === 'katakana' }" @click="mode = 'katakana'">カタカナ</button>
             </div>
             <div class="btn-actions">
-                <!-- 発音チェックボタンを追加 -->
                 <button class="action-btn check" :disabled="!selectedSound" @click="startSpeechRecognition">
                     チェック
                 </button>
@@ -216,12 +247,11 @@
             </div>
         </div>
 
-        <!-- 音声チェック結果の簡易表示エリア -->
         <div v-if="checkResult" :class="['check-status', checkResultClass]">
             {{ checkResult }}
         </div>
 
-        <!-- スクロール不要な4行3列（合計11グループ、1枠空き）のレイアウト -->
+        <!-- 画面全体に引き伸ばされたメイングリッド -->
         <div class="main-grid">
             <div v-for="(group, gIndex) in currentData" :key="gIndex" class="row-group">
                 <button 
@@ -251,17 +281,17 @@
         </div>
 
         <div class="practice-container" v-if="selectedSound">
-            <!-- 上段: 最も離れている表示 -->
+            <!-- 上段: 遠い（以前の"近い"のレベルまで最初から近づけて表示） -->
             <div class="step-box far" :class="{ 'active-frame': currentStep === 1 }">
                 {{ largeSplitKana.first }}{{ largeSplitKana.second }}
             </div>
 
-            <!-- 中段: 少し近づいている表示に修正 -->
+            <!-- 中段: 近い（文字がすれすれに重なる手前までさらに接近） -->
             <div class="step-box close" :class="{ 'active-frame': currentStep === 2 }">
                 {{ largeSplitKana.first }}{{ largeSplitKana.second }}
             </div>
 
-            <!-- 下段: 完全にくっついている表示 -->
+            <!-- 下段: くっつく -->
             <div class="step-box combined" :class="{ 'active-frame': currentStep === 3 }">
                 {{ selectedSound.kana }}
             </div>
@@ -280,11 +310,9 @@
             const currentStep = ref(0);
             const isPlaying = ref(false);
             
-            // 発音チェック管理用
             const checkResult = ref('');
-            const checkStatus = ref(''); // 'listening', 'success', 'fail'
+            const checkStatus = ref('');
 
-            // 全11グループのデータ
             const yoanData = [
                 { h: ['きゃ', 'きゅ', 'きょ'], k: ['キャ', 'キュ', 'キョ'], r: ['kya', 'kyu', 'kyo'] },
                 { h: ['しゃ', 'しゅ', 'しょ'], k: ['シャ', 'シュ', 'ショ'], r: ['sha', 'shu', 'sho'] },
@@ -344,7 +372,7 @@
 
             const selectSound = (item) => {
                 selectedSound.value = item;
-                checkResult.value = ''; // 選択を変えたらチェック結果をクリア
+                checkResult.value = '';
                 speakWord(item.kana);
             };
 
@@ -359,7 +387,7 @@
                 view.value = 'main';
             };
 
-            // 練習ページ：上段を最も離し、中段は今より近づける（音声間隔も同様に調整）
+            // 【音声間隔の修正】文字の距離に合わせて、発音間隔も大幅に短縮
             const startPracticeAnimation = async () => {
                 if (isPlaying.value || !selectedSound.value) return;
                 isPlaying.value = true;
@@ -368,23 +396,23 @@
                 const secondChar = largeSplitKana.value.second;
                 const fullChar = selectedSound.value.kana;
 
-                // ステップ1: 上段（最も離れている発音）
+                // ステップ1: 遠い（文字は少し近め、発音間隔を350msへ短縮）
                 currentStep.value = 1;
-                await speakWord(firstChar, 0.9);
-                await new Promise(r => setTimeout(r, 1000)); // 間隔を広めに設定(1000ms)
-                await speakWord(secondChar, 0.9);
-                await new Promise(r => setTimeout(r, 1200));
+                await speakWord(firstChar, 1.0);
+                await new Promise(r => setTimeout(r, 350)); 
+                await speakWord(secondChar, 1.0);
+                await new Promise(r => setTimeout(r, 1000));
 
-                // ステップ2: 中段（少し近づいている発音）
+                // ステップ2: 近い（文字はすれすれ、発音間隔をわずか80msへ短縮。ほぼ一息）
                 currentStep.value = 2;
                 await speakWord(firstChar, 1.0);
-                await new Promise(r => setTimeout(r, 200)); // 間隔を今より短く調整(200ms)
+                await new Promise(r => setTimeout(r, 80)); 
                 await speakWord(secondChar, 1.0);
-                await new Promise(r => setTimeout(r, 1200));
+                await new Promise(r => setTimeout(r, 1000));
 
-                // ステップ3: 下段（完全につなげて発音）
+                // ステップ3: くっつく
                 currentStep.value = 3;
-                await speakWord(fullChar, 0.9);
+                await speakWord(fullChar, 1.0);
                 
                 setTimeout(() => {
                     currentStep.value = 0;
@@ -392,25 +420,23 @@
                 }, 1000);
             };
 
-            // 【新機能】音声認識による発音チェック
             const startSpeechRecognition = () => {
                 if (!selectedSound.value) return;
 
-                // ブラウザが音声認識に対応しているかチェック
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 if (!SpeechRecognition) {
                     checkStatus.value = 'fail';
-                    checkResult.value = 'Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. (お使いのブラウザは音声認識に非対応です)';
+                    checkResult.value = 'Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.';
                     return;
                 }
 
                 const recognition = new SpeechRecognition();
-                recognition.lang = 'ja-JP'; // 日本語を認識
+                recognition.lang = 'ja-JP';
                 recognition.interimResults = false;
                 recognition.maxAlternatives = 1;
 
                 checkStatus.value = 'listening';
-                checkResult.value = `Hãy nói: "${selectedSound.value.kana}" (どうぞ発音してください...)`;
+                checkResult.value = `Hãy nói: "${selectedSound.value.kana}"`;
 
                 recognition.start();
 
@@ -418,19 +444,18 @@
                     const userSpeech = event.results[0][0].transcript.trim();
                     const targetSound = selectedSound.value.kana;
 
-                    // ひらがな・カタカナ両方で判定が通るように簡易チェック
                     if (userSpeech === targetSound || userSpeech.includes(targetSound)) {
                         checkStatus.value = 'success';
-                        checkResult.value = `Chính xác! O (正解！ あなたの音声: ${userSpeech})`;
+                        checkResult.value = `Chính xác! O (${userSpeech})`;
                     } else {
                         checkStatus.value = 'fail';
-                        checkResult.value = `Chưa đúng, thử lại nhé! X (不正確、もう一度！ あなたの音声: ${userSpeech})`;
+                        checkResult.value = `Chưa đúng, thử lại nhé! X (${userSpeech})`;
                     }
                 };
 
-                recognition.onerror = (event) => {
+                recognition.onerror = () => {
                     checkStatus.value = 'fail';
-                    checkResult.value = 'Lỗi nhận diện âm thanh. (音声の認識に失敗しました)';
+                    checkResult.value = 'Lỗi nhận diện âm thanh.';
                 };
             };
 
