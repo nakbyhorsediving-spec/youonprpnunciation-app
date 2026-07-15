@@ -228,6 +228,7 @@
 <body>
 
 <div id="app">
+    <!-- 1. 全音表示画面（メイン） -->
     <div v-if="view === 'main'" class="main-container">
         <h1>拗音（ようおん）の べんきょう</h1>
         
@@ -266,6 +267,7 @@
         </div>
     </div>
 
+    <!-- 2. 練習ページ画面 -->
     <div v-if="view === 'practice'" class="practice-page">
         <h1>Luyện tập nối âm</h1>
         <p class="subtitle">Các âm sẽ dần ghép lại với nhau theo khung màu đỏ nhé!</p>
@@ -278,14 +280,17 @@
         </div>
 
         <div class="practice-container" v-if="selectedSound">
+            <!-- 上段: 遠い -->
             <div class="step-box far" :class="{ 'active-frame': currentStep === 1 }">
                 {{ largeSplitKana.first }}{{ largeSplitKana.second }}
             </div>
 
+            <!-- 中段: 近い -->
             <div class="step-box close" :class="{ 'active-frame': currentStep === 2 }">
                 {{ largeSplitKana.first }}{{ largeSplitKana.second }}
             </div>
 
+            <!-- 下段: くっつく -->
             <div class="step-box combined" :class="{ 'active-frame': currentStep === 3 }">
                 {{ selectedSound.kana }}
             </div>
@@ -393,9 +398,9 @@
                 // ステップ1: 上段
                 currentStep.value = 1;
                 await speakWord(firstChar, 1.0);
-                await new Promise(r => setTimeout(r, 70)); // ディレイを 70ms に設定
+                await new Promise(r => setTimeout(r, 50)); // ディレイを 50ms に設定
                 await speakWord(secondChar, 1.0);
-                await new Promise(r => setTimeout(r, 600)); // 待ち時間は 600ms のまま維持
+                await new Promise(r => setTimeout(r, 500)); // 待ち時間を 500ms に設定
 
                 // ステップ2: 中段
                 currentStep.value = 2;
