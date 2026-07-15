@@ -378,4 +378,98 @@
 
             const goBack = () => {
                 window.speechSynthesis.cancel();
-                view.value
+                view.value = 'main';
+            };
+
+            const startPracticeAnimation = async () => {
+                if (isPlaying.value || !selectedSound.value) return;
+                isPlaying.value = true;
+
+                const firstChar = largeSplitKana.value.first;
+                const secondChar = largeSplitKana.value.second;
+                const fullChar = selectedSound.value.kana;
+                const plainBothChars = firstChar + secondChar;
+
+                // ステップ1: 上段
+                currentStep.value = 1;
+                await speakWord(firstChar, 1.0);
+                await new Promise(r => setTimeout(r, 210)); 
+                await speakWord(secondChar, 1.0);
+                await new Promise(r => setTimeout(r, 1200)); 
+
+                // ステップ2: 中段
+                currentStep.value = 2;
+                await speakWord(plainBothChars, 1.0); 
+                await new Promise(r => setTimeout(r, 1200));
+
+                // ステップ3: 下段
+                currentStep.value = 3;
+                await speakWord(fullChar, 1.0);
+                
+                setTimeout(() => {
+                    currentStep.value = 0;
+                    isPlaying.value = false;
+                }, 1000);
+            };
+
+            const startSpeechRecognition = () => {
+                if (!selectedSound.value) return;
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    checkStatus.value = 'fail';
+                    checkResult.value = 'Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.';
+                    return;
+                }
+
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'ja-JP';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                checkStatus.value = 'listening';
+                checkResult.value = `Hãy nói: "${selectedSound.value.kana}"`;
+
+                recognition.start();
+
+                recognition.onresult = (event) => {
+                    const userSpeech = event.results[0][0].transcript.trim();
+                    const targetSound = selectedSound.value.kana;
+
+                    if (userSpeech === targetSound || userSpeech.includes(targetSound)) {
+                        checkStatus.value = 'success';
+                        checkResult.value = `Chính xác! O (${userSpeech})`;
+                    } else {
+                        checkStatus.value = 'fail';
+                        checkResult.value = `Chưa đúng, thử lại nhé! X (${userSpeech})`;
+                    }
+                };
+
+                recognition.onerror = () => {
+                    checkStatus.value = 'fail';
+                    checkResult.value = 'Lỗi nhận diện âm thanh.';
+                };
+            };
+
+            return {
+                view,
+                mode,
+                selectedSound,
+                currentData,
+                largeSplitKana,
+                currentStep,
+                isPlaying,
+                checkResult,
+                checkStatus,
+                checkResultClass,
+                selectSound,
+                goToPractice,
+                goBack,
+                startPracticeAnimation,
+                startSpeechRecognition
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
