@@ -198,9 +198,10 @@
             align-items: center;
         }
         
-        /* 表記の距離 (上段を 80px に設定しました) */
+        /* 表記の距離 */
         .step-box.far { letter-spacing: 80px; padding-left: 80px; }       
-        .step-box.close { letter-spacing: 45px; padding-left: 45px; }     
+        /* 中段の表記間隔を 45px から 25px（20px縮小）へ修正 */
+        .step-box.close { letter-spacing: 25px; padding-left: 25px; }     
         .step-box.combined { letter-spacing: 0px; padding-left: 0; }      
         
         .step-box.active-frame {
