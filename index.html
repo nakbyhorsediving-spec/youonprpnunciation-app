@@ -200,7 +200,6 @@
         
         /* 表記の距離 */
         .step-box.far { letter-spacing: 80px; padding-left: 80px; }       
-        /* 中段の表記間隔を 45px から 25px（20px縮小）へ修正 */
         .step-box.close { letter-spacing: 25px; padding-left: 25px; }     
         .step-box.combined { letter-spacing: 0px; padding-left: 0; }      
         
@@ -394,9 +393,9 @@
                 // ステップ1: 上段
                 currentStep.value = 1;
                 await speakWord(firstChar, 1.0);
-                await new Promise(r => setTimeout(r, 105)); 
+                await new Promise(r => setTimeout(r, 70)); // ディレイを 70ms に設定
                 await speakWord(secondChar, 1.0);
-                await new Promise(r => setTimeout(r, 600)); 
+                await new Promise(r => setTimeout(r, 600)); // 待ち時間は 600ms のまま維持
 
                 // ステップ2: 中段
                 currentStep.value = 2;
