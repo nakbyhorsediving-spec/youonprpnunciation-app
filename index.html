@@ -198,8 +198,8 @@
             align-items: center;
         }
         
-        /* 表記の距離 */
-        .step-box.far { letter-spacing: 90px; padding-left: 90px; }       
+        /* 表記の距離 (30%近づけるため、90pxから63pxへ修正) */
+        .step-box.far { letter-spacing: 63px; padding-left: 63px; }       
         .step-box.close { letter-spacing: 45px; padding-left: 45px; }     
         .step-box.combined { letter-spacing: 0px; padding-left: 0; }      
         
@@ -228,9 +228,7 @@
 <body>
 
 <div id="app">
-    <!-- 1. 全音表示画面（メイン） -->
     <div v-if="view === 'main'" class="main-container">
-        <!-- 表記を修正：「拗音（ようおん）の べんきょう」 -->
         <h1>拗音（ようおん）の べんきょう</h1>
         
         <div class="header-controls">
@@ -268,7 +266,6 @@
         </div>
     </div>
 
-    <!-- 2. 練習ページ画面 -->
     <div v-if="view === 'practice'" class="practice-page">
         <h1>Luyện tập nối âm</h1>
         <p class="subtitle">Các âm sẽ dần ghép lại với nhau theo khung màu đỏ nhé!</p>
@@ -281,17 +278,14 @@
         </div>
 
         <div class="practice-container" v-if="selectedSound">
-            <!-- 上段: 遠い -->
             <div class="step-box far" :class="{ 'active-frame': currentStep === 1 }">
                 {{ largeSplitKana.first }}{{ largeSplitKana.second }}
             </div>
 
-            <!-- 中段: 近い -->
             <div class="step-box close" :class="{ 'active-frame': currentStep === 2 }">
                 {{ largeSplitKana.first }}{{ largeSplitKana.second }}
             </div>
 
-            <!-- 下段: くっつく -->
             <div class="step-box combined" :class="{ 'active-frame': currentStep === 3 }">
                 {{ selectedSound.kana }}
             </div>
@@ -384,98 +378,4 @@
 
             const goBack = () => {
                 window.speechSynthesis.cancel();
-                view.value = 'main';
-            };
-
-            const startPracticeAnimation = async () => {
-                if (isPlaying.value || !selectedSound.value) return;
-                isPlaying.value = true;
-
-                const firstChar = largeSplitKana.value.first;
-                const secondChar = largeSplitKana.value.second;
-                const fullChar = selectedSound.value.kana;
-                const plainBothChars = firstChar + secondChar;
-
-                // ステップ1: 上段
-                currentStep.value = 1;
-                await speakWord(firstChar, 1.0);
-                await new Promise(r => setTimeout(r, 210)); 
-                await speakWord(secondChar, 1.0);
-                await new Promise(r => setTimeout(r, 1200)); 
-
-                // ステップ2: 中段
-                currentStep.value = 2;
-                await speakWord(plainBothChars, 1.0); 
-                await new Promise(r => setTimeout(r, 1200));
-
-                // ステップ3: 下段
-                currentStep.value = 3;
-                await speakWord(fullChar, 1.0);
-                
-                setTimeout(() => {
-                    currentStep.value = 0;
-                    isPlaying.value = false;
-                }, 1000);
-            };
-
-            const startSpeechRecognition = () => {
-                if (!selectedSound.value) return;
-
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRecognition) {
-                    checkStatus.value = 'fail';
-                    checkResult.value = 'Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.';
-                    return;
-                }
-
-                const recognition = new SpeechRecognition();
-                recognition.lang = 'ja-JP';
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-
-                checkStatus.value = 'listening';
-                checkResult.value = `Hãy nói: "${selectedSound.value.kana}"`;
-
-                recognition.start();
-
-                recognition.onresult = (event) => {
-                    const userSpeech = event.results[0][0].transcript.trim();
-                    const targetSound = selectedSound.value.kana;
-
-                    if (userSpeech === targetSound || userSpeech.includes(targetSound)) {
-                        checkStatus.value = 'success';
-                        checkResult.value = `Chính xác! O (${userSpeech})`;
-                    } else {
-                        checkStatus.value = 'fail';
-                        checkResult.value = `Chưa đúng, thử lại nhé! X (${userSpeech})`;
-                    }
-                };
-
-                recognition.onerror = () => {
-                    checkStatus.value = 'fail';
-                    checkResult.value = 'Lỗi nhận diện âm thanh.';
-                };
-            };
-
-            return {
-                view,
-                mode,
-                selectedSound,
-                currentData,
-                largeSplitKana,
-                currentStep,
-                isPlaying,
-                checkResult,
-                checkStatus,
-                checkResultClass,
-                selectSound,
-                goToPractice,
-                goBack,
-                startPracticeAnimation,
-                startSpeechRecognition
-            };
-        }
-    }).mount('#app');
-</script>
-</body>
-</html>
+                view.value
